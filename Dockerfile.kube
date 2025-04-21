@@ -1,0 +1,76 @@
+####################################################################################################
+## Use this for production
+## the runtime configuration location: /app/config/default.toml
+##
+## Builder stage
+## 🔖 Every call to RUN COPY generates a new layer
+## ref: https://wlkn.io/blog/rust-ci-speedup
+####################################################################################################
+FROM ekidd/rust-musl-builder:1.57.0 as builder
+WORKDIR /app
+USER root
+####################################################################################################
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tree \
+    && rm -rf /var/lib/apt/lists/*
+
+## Create a dependency shell
+COPY ./Cargo.* ./
+COPY ./async-redis-session ./async-redis-session
+
+COPY ./oauth ./oauth
+
+RUN cargo fetch
+RUN cargo build \
+    --release \
+    --target x86_64-unknown-linux-musl \
+    --bin oauth \
+    --target-dir target
+# RUN find target -type f -name "oauth[-]*"
+
+####################################################################################################
+## Compute any additional artifacts to be copied
+####################################################################################################
+# Create appuser
+ARG USER=appuser
+RUN adduser \
+    --disabled-login \
+    --disabled-password \
+    --gecos "" \
+    --no-create-home \
+    "${USER}"
+
+# separate layer for config
+COPY ./config ./config
+
+# assemble binary, config and chown to appuser
+RUN echo "📁root: $(pwd)" && \
+    echo "👉app/oauth/src" && ls -l /app/oauth/src && \
+    echo "📁/app/target" && tree -L 3 -a /app/target && \
+    mkdir /app/bin && cp /app/target/x86_64-unknown-linux-musl/release/oauth /app/bin/ && \
+    chown -R "${USER}" /app && \
+    echo "✅/app" && ls -la /app && tree -L 2 -a /app
+
+####################################################################################################
+## Final image
+####################################################################################################
+FROM frolvlad/alpine-bash:latest as runtime
+WORKDIR /app
+ARG USER=appuser
+
+# Import from builder
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /app/bin    /app/bin
+COPY --from=builder /app/config /app/config
+
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
+ENV RUST_ENV=Production
+ENV RUST_LOG="oauth=trace,tower_http=trace"
+
+
+USER ${USER}
+CMD ["/app/bin/oauth"]

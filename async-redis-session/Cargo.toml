@@ -1,0 +1,19 @@
+[package]
+authors     = ["Jacob Rothstein <hi@jbr.me>, Edmund Cape <edmund.cape@lucivia.com"]
+categories  = ["web-programming::http-server", "web-programming", "database"]
+description = "redis session store for async-session with updated redis dependency"
+edition     = "2021"
+keywords    = ["sessions", "tide", "async-session", "redis"]
+license     = "MIT OR Apache-2.0"
+name        = "async-redis-session"
+version     = "0.3.0"
+
+[dependencies.redis]
+features = ["aio", "async-std-comp"]
+version  = "0.21.5"
+
+[dependencies]
+async-session = "3.0.0"
+
+[dev-dependencies]
+async-std = { version = "1.9.0", features = ["attributes"] }

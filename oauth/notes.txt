@@ -1,0 +1,61 @@
+        // timeout - may not be required if not serving static pages
+        .layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|error: BoxError| async move {
+                    if error.is::<tower::timeout::error::Elapsed>() {
+                        Ok(StatusCode::REQUEST_TIMEOUT)
+                    } else {
+                        Err((
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            format!("Unhandled error: {}", error),
+                        ))
+                    }
+                }))
+                .timeout(Duration::from_secs(10))
+                .layer(TraceLayer::new_for_http())
+                .into_inner(),
+        )
+auth-deployment-58d4c77cfd-9kvb9 auth-container 🔗 😈->🙂 auth_url:
+auth-deployment-58d4c77cfd-9kvb9 auth-container
+https://accounts.google.com/o/oauth2/v2/auth?
+response_type=code
+&client_id=999982566755-ggg0c9uj352eomv7o549538boas4guu7.apps.googleusercontent.com
+&state=b36d1ce2-44a2-407e-8c0d-7083a4e581a1
+&code_challenge=iwMcmHfUIqKDID8FMk19-jX_Bd_Tt68y4s3tM3VvK8g
+&code_challenge_method=S256
+&redirect_uri=https%3A%2F%2Fapp.data-join.com%2Fauth%2Fdrive%2Fauthorized%2Fgoogle
+&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly
+&access_type=offline
+&token_access_type=offline
+&refresh_token_key=refresh_access
+
+
+auth_url: Url {
+    scheme: "https",
+    cannot_be_a_base: false, username: "",
+    password: None,
+    host: Some(Domain("accounts.google.com")),
+    port: None,
+    path: "/o/oauth2/v2/auth",
+    query: Some("response_type=code&
+                 client_id=999982566755-ggg0c9uj352eomv7o549538boas4guu7.apps.googleusercontent.com&state=24a74b27-5e91-41bb-b7a4-67af3c4d73e6&
+                 code_challenge=2KPMVg10FSvmW-1PxCv_6Rwjtv6c1haBWLAggAvXKzk&
+                 code_challenge_method=S256&
+                 redirect_uri=https%3A%2F%2Fapp.data-join.com%2Fauth%2Fdrive%2Fauthorized%2Fgoogle&
+                 scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly&
+                 prompt=consent&
+                 access_type=offline&
+                 refresh_token_key=refresh_access"),
+    fragment: None
+    }
+
+https://accounts.google.com/o/oauth2/v2/auth?response_type=code&
+client_id=999982566755-ggg0c9uj352eomv7o549538boas4guu7.apps.googleusercontent.com&
+state=24a74b27-5e91-41bb-b7a4-67af3c4d73e6&
+code_challenge=2KPMVg10FSvmW-1PxCv_6Rwjtv6c1haBWLAggAvXKzk&
+code_challenge_method=S256&
+redirect_uri=https%3A%2F%2Fapp.data-join.com%2Fauth%2Fdrive%2Fauthorized%2Fgoogle&
+scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly&
+prompt=consent&
+access_type=offline&
+refresh_token_key=refresh_access

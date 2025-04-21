@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+  "oauth",
+  "async-redis-session"
+  # "file-server",
+  # "jobstatus-tonic",
+  # "tnc-app",
+]

@@ -1,0 +1,16 @@
+# directories
+bin/
+target/
+node_modules/
+file-server/
+tnc-app/
+www-old/
+assets-old/
+
+# specific files
+!.env
+!Dockerfile.local
+.DS_Store
+package.json
+yarn.lock
+.prettierrc.json
